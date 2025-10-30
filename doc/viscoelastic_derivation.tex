@@ -1,0 +1,228 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+
+\title{Derivation of the Viscoelastic Linear Operator}
+\author{From Basic Equations to Eigenvalue Problem}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Complete System of Equations}
+
+We start with the four fundamental equations for viscoelastic deformation:
+
+\textbf{1. Momentum balance (quasi-static):}
+\begin{equation}
+\nabla \cdot \sigma = -f
+\end{equation}
+where $f$ is body force (gravitational loading).
+
+\textbf{2. Strain-displacement relation:}
+\begin{equation}
+\epsilon_{ij} = \frac{1}{2}\left(\frac{\partial u_i}{\partial x_j} + \frac{\partial u_j}{\partial x_i}\right)
+\end{equation}
+
+\textbf{3. Maxwell rheology:}
+\begin{equation}
+\dot{\epsilon}_{ij} = \frac{1}{2\eta}\sigma_{ij}' + \frac{1}{2\mu}\dot{\sigma}_{ij}'
+\end{equation}
+where $\sigma_{ij}' = \sigma_{ij} - \frac{1}{3}\sigma_{kk}\delta_{ij}$ is deviatoric stress.
+
+\textbf{4. Elastic stress-strain relation:}
+\begin{equation}
+\sigma_{ij} = 2\mu\epsilon_{ij} + \lambda\epsilon_{kk}\delta_{ij}
+\end{equation}
+where $\lambda, \mu$ are Lamé parameters.
+
+\section{Elimination Process}
+
+\subsection{Step 1: Express stress in terms of displacement}
+
+From equations (2) and (4):
+\begin{equation}
+\sigma_{ij} = \mu\left(\frac{\partial u_i}{\partial x_j} + \frac{\partial u_j}{\partial x_i}\right) + \lambda\frac{\partial u_k}{\partial x_k}\delta_{ij}
+\end{equation}
+
+\subsection{Step 2: Deviatoric stress}
+
+The deviatoric part of (5):
+\begin{equation}
+\sigma_{ij}' = \mu\left(\frac{\partial u_i}{\partial x_j} + \frac{\partial u_j}{\partial x_i}\right) - \frac{2\mu}{3}\frac{\partial u_k}{\partial x_k}\delta_{ij}
+\end{equation}
+
+\subsection{Step 3: Time derivatives}
+
+From (2):
+\begin{equation}
+\dot{\epsilon}_{ij} = \frac{1}{2}\left(\frac{\partial \dot{u}_i}{\partial x_j} + \frac{\partial \dot{u}_j}{\partial x_i}\right)
+\end{equation}
+
+From (6):
+\begin{equation}
+\dot{\sigma}_{ij}' = \mu\left(\frac{\partial \dot{u}_i}{\partial x_j} + \frac{\partial \dot{u}_j}{\partial x_i}\right) - \frac{2\mu}{3}\frac{\partial \dot{u}_k}{\partial x_k}\delta_{ij}
+\end{equation}
+
+\section{Substitution into Maxwell Equation}
+
+Substituting (7) and (8) into the Maxwell rheology (3):
+
+\begin{equation}
+\frac{1}{2}\left(\frac{\partial \dot{u}_i}{\partial x_j} + \frac{\partial \dot{u}_j}{\partial x_i}\right) = \frac{1}{2\eta}\left[\mu\left(\frac{\partial u_i}{\partial x_j} + \frac{\partial u_j}{\partial x_i}\right) - \frac{2\mu}{3}\frac{\partial u_k}{\partial x_k}\delta_{ij}\right] + \frac{1}{2\mu}\left[\mu\left(\frac{\partial \dot{u}_i}{\partial x_j} + \frac{\partial \dot{u}_j}{\partial x_i}\right) - \frac{2\mu}{3}\frac{\partial \dot{u}_k}{\partial x_k}\delta_{ij}\right]
+\end{equation}
+
+Simplifying:
+\begin{equation}
+\frac{\partial \dot{u}_i}{\partial x_j} + \frac{\partial \dot{u}_j}{\partial x_i} = \frac{\mu}{\eta}\left(\frac{\partial u_i}{\partial x_j} + \frac{\partial u_j}{\partial x_i}\right) - \frac{2\mu}{3\eta}\frac{\partial u_k}{\partial x_k}\delta_{ij} + \frac{\partial \dot{u}_i}{\partial x_j} + \frac{\partial \dot{u}_j}{\partial x_i} - \frac{2}{3}\frac{\partial \dot{u}_k}{\partial x_k}\delta_{ij}
+\end{equation}
+
+This gives us:
+\begin{equation}
+0 = \frac{\mu}{\eta}\left(\frac{\partial u_i}{\partial x_j} + \frac{\partial u_j}{\partial x_i}\right) - \frac{2\mu}{3\eta}\frac{\partial u_k}{\partial x_k}\delta_{ij} - \frac{2}{3}\frac{\partial \dot{u}_k}{\partial x_k}\delta_{ij}
+\end{equation}
+
+\section{The Linear Operator}
+
+From momentum balance (1) with stress (5):
+\begin{equation}
+\mu\nabla^2 u_i + (\lambda + \mu)\frac{\partial}{\partial x_i}\left(\frac{\partial u_k}{\partial x_k}\right) = -f_i
+\end{equation}
+
+Combined with the Maxwell constraint (11), we get the \textbf{viscoelastic wave equation}:
+
+\begin{equation}
+\boxed{
+\mu\nabla^2 \dot{u}_i + (\lambda + \mu)\frac{\partial}{\partial x_i}\left(\frac{\partial \dot{u}_k}{\partial x_k}\right) + \frac{\mu^2}{\eta}\nabla^2 u_i + \frac{\mu(\lambda + \mu)}{\eta}\frac{\partial}{\partial x_i}\left(\frac{\partial u_k}{\partial x_k}\right) = -\dot{f}_i
+}
+\end{equation}
+
+\section{Eigenvalue Problem}
+
+For time-harmonic solutions $u_i = \hat{u}_i e^{-\lambda t}$, equation (13) becomes:
+
+\begin{equation}
+\left[-\lambda\mu\nabla^2 + \frac{\mu^2}{\eta}\nabla^2\right]\hat{u}_i + \left[-\lambda(\lambda + \mu)\frac{\partial}{\partial x_i}\frac{\partial}{\partial x_k} + \frac{\mu(\lambda + \mu)}{\eta}\frac{\partial}{\partial x_i}\frac{\partial}{\partial x_k}\right]\hat{u}_k = \lambda\hat{f}_i
+\end{equation}
+
+This gives us the \textbf{linear operator}:
+
+\begin{equation}
+\boxed{
+L_{ij}[\hat{u}] = \left[\mu\left(\frac{\mu}{\eta} - \lambda\right)\nabla^2\delta_{ij} + (\lambda + \mu)\left(\frac{\mu}{\eta} - \lambda\right)\frac{\partial^2}{\partial x_i \partial x_j}\right]\hat{u}_j
+}
+\end{equation}
+
+\section{Eigenvalue Interpretation}
+
+The eigenvalue equation is:
+\begin{equation}
+L_{ij}[\hat{u}_j] = \lambda\hat{f}_i
+\end{equation}
+
+The eigenvalues $\lambda$ satisfy:
+\begin{equation}
+\lambda = \frac{\mu}{\eta} \pm \text{corrections from elastic terms}
+\end{equation}
+
+These eigenvalues determine the \textbf{relaxation times} $\tau = 1/\lambda$ that appear in the viscoelastic Love numbers:
+\begin{equation}
+h_\ell(t) = h_\ell^E\delta(t) + \sum_k r_\ell^k e^{-t/\tau_k}
+\end{equation}
+
+\section{Spherical Harmonic Decomposition}
+
+For a **spherically symmetric Earth**, we transform to spherical coordinates $(r,\theta,\phi)$ and expand in spherical harmonics.
+
+\subsection{Displacement Field Expansion}
+
+The displacement field separates as:
+\begin{align}
+u_r(r,\theta,\phi,t) &= \sum_{\ell=0}^{\infty} \sum_{m=-\ell}^{\ell} u_r^{\ell m}(r,t) Y_\ell^m(\theta,\phi) \\
+u_\theta(r,\theta,\phi,t) &= \sum_{\ell=0}^{\infty} \sum_{m=-\ell}^{\ell} u_\theta^{\ell m}(r,t) \frac{\partial Y_\ell^m}{\partial \theta} \\
+u_\phi(r,\theta,\phi,t) &= \sum_{\ell=0}^{\infty} \sum_{m=-\ell}^{\ell} u_\phi^{\ell m}(r,t) \frac{1}{\sin\theta}\frac{\partial Y_\ell^m}{\partial \phi}
+\end{align}
+
+\subsection{Spherical Laplacian Eigenvalue Property}
+
+The key insight is that spherical harmonics are eigenfunctions of the angular part of $\nabla^2$:
+\begin{equation}
+\nabla^2 Y_\ell^m = \left[\frac{1}{r^2}\frac{\partial}{\partial r}\left(r^2\frac{\partial}{\partial r}\right) - \frac{\ell(\ell+1)}{r^2}\right] Y_\ell^m
+\end{equation}
+
+\subsection{Separation by Degree}
+
+When we substitute the expansion (18)-(20) into the linear operator $L_{ij}$, **the problem separates by spherical harmonic degree $\ell$**.
+
+For each $\ell$, we get a **radial ODE system**:
+\begin{equation}
+\mathcal{L}_\ell^{(r)} \begin{pmatrix} u_r^{\ell m}(r) \\ u_\theta^{\ell m}(r) \end{pmatrix} = \lambda_{\ell,k} \begin{pmatrix} u_r^{\ell m}(r) \\ u_\theta^{\ell m}(r) \end{pmatrix}
+\end{equation}
+
+where $\mathcal{L}_\ell^{(r)}$ is the **radial differential operator** that depends on degree $\ell$.
+
+\subsection{Radial Operator Structure}
+
+The radial operator has the form:
+\begin{equation}
+\mathcal{L}_\ell^{(r)} = \begin{pmatrix}
+\frac{d^2}{dr^2} + \frac{2}{r}\frac{d}{dr} - \frac{\ell(\ell+1)}{r^2} + \frac{\mu}{\eta} & \text{coupling terms} \\
+\text{coupling terms} & \frac{d^2}{dr^2} + \frac{2}{r}\frac{d}{dr} - \frac{\ell(\ell+1)}{r^2} + \frac{\mu}{\eta}
+\end{pmatrix}
+\end{equation}
+
+\section{Connection to Love Numbers}
+
+\subsection{Eigenvalue Spectrum}
+
+For each degree $\ell$, the radial operator $\mathcal{L}_\ell^{(r)}$ has eigenvalues:
+\begin{equation}
+\lambda_{\ell,1}, \lambda_{\ell,2}, \lambda_{\ell,3}, \ldots
+\end{equation}
+
+These give the **relaxation times** for degree $\ell$:
+\begin{equation}
+\tau_{\ell,k} = \frac{1}{\lambda_{\ell,k}}
+\end{equation}
+
+\subsection{Love Number Time Dependence}
+
+The **viscoelastic Love numbers** are constructed from these eigenvalues:
+\begin{align}
+h_\ell(t) &= h_\ell^E \delta(t) + \sum_{k=1}^{\infty} r_{\ell,k}^h e^{-t/\tau_{\ell,k}} \\
+k_\ell(t) &= k_\ell^E \delta(t) + \sum_{k=1}^{\infty} r_{\ell,k}^k e^{-t/\tau_{\ell,k}}
+\end{align}
+
+where:
+\begin{itemize}
+\item $h_\ell^E, k_\ell^E$ are **elastic Love numbers** (instantaneous response)
+\item $r_{\ell,k}^{h,k}$ are **residues** (amplitudes of each mode)
+\item $\tau_{\ell,k} = 1/\lambda_{\ell,k}$ are **relaxation times** from eigenvalues
+\end{itemize}
+
+\subsection{Physical Interpretation}
+
+\begin{itemize}
+\item **$\ell = 0$**: Radial expansion/contraction (breathing mode)
+\item **$\ell = 1$**: Translational motion (center of mass)
+\item **$\ell = 2$**: Flattening/elongation (tidal deformation)
+\item **Higher $\ell$**: Shorter wavelength surface deformation
+\end{itemize}
+
+Each degree $\ell$ has multiple relaxation times $\tau_{\ell,k}$ corresponding to different **radial modes**:
+\begin{itemize}
+\item Fast modes: Surface/shallow deformation (years to decades)
+\item Slow modes: Deep mantle flow (thousands of years)
+\end{itemize}
+
+\section{Summary}
+
+The complete chain is:
+\begin{center}
+\textbf{Maxwell rheology} $\rightarrow$ \textbf{Linear operator $L$} $\rightarrow$ \textbf{Spherical harmonic separation} $\rightarrow$ \textbf{Radial eigenvalue problems} $\rightarrow$ \textbf{Relaxation times $\tau_{\ell,k}$} $\rightarrow$ \textbf{Love number exponentials}
+\end{center}
+
+The exponential terms $e^{-t/\tau_{\ell,k}}$ in viscoelastic Love numbers arise directly from the **eigenvalue spectrum** of the radial viscoelastic operator for each spherical harmonic degree $\ell$.
+
+\end{document}
