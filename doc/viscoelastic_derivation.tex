@@ -2,40 +2,73 @@
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{amssymb}
+\usepackage{physics}
 
-\title{Derivation of the Viscoelastic Linear Operator}
-\author{From Basic Equations to Eigenvalue Problem}
+\title{Viscoelastic Earth Response Theory: From Tromp \& Mitrovica (1999) to Sea Level Applications}
+\author{Following the Normal-Mode Formalism for SLcode Implementation}
 \date{}
 
 \begin{document}
 \maketitle
 
-\section{Complete System of Equations}
+\section{Introduction: The Theoretical Foundation}
 
-We start with the four fundamental equations for viscoelastic deformation:
+This document presents the complete theoretical framework underlying viscoelastic Earth response calculations in SLcode, following the rigorous normal-mode formalism developed by Tromp \& Mitrovica (1999) and applied to sea level problems by Kendall et al. (2005).
+
+\textbf{Key Insight:} The exponential time dependence in viscoelastic Love numbers arises naturally from the normal-mode expansion of the Earth's response to surface loading, where each mode has its own characteristic decay time determined by the Earth's rheological structure.
+
+\section{Physical Picture: Why Normal Modes?}
+
+When a surface load is applied to a viscoelastic Earth:
+\begin{enumerate}
+\item The Earth responds with both \textbf{instantaneous elastic deformation} and \textbf{time-dependent viscous flow}
+\item The viscous response can be decomposed into \textbf{normal modes} - fundamental oscillatory solutions of the viscoelastic Earth
+\item Each normal mode has a characteristic \textbf{decay rate} $s_k$ that depends on the Earth's rheological structure
+\item The total response is a \textbf{superposition} of all these modes, each decaying exponentially as $e^{-s_k t}$
+\end{enumerate}
+
+This is analogous to how a damped mechanical system responds to forcing - the response is a sum of damped oscillatory modes.
+
+\section{The Viscoelastic Normal-Mode Problem (Tromp \& Mitrovica 1999)}
+
+\subsection{Governing Equations}
+
+For a self-gravitating, viscoelastic Earth, the fundamental equations are:
 
 \textbf{1. Momentum balance (quasi-static):}
 \begin{equation}
-\nabla \cdot \sigma = -f
+\nabla \cdot \mathbf{T} - \nabla(\rho \mathbf{u} \cdot \nabla \Phi) + \rho \nabla \phi + \rho_1 \nabla \Phi = 0
 \end{equation}
-where $f$ is body force (gravitational loading).
+where $\mathbf{T}$ is the incremental Cauchy stress, $\mathbf{u}$ is displacement, $\phi$ is perturbed gravitational potential, and $\Phi$ is the background potential.
 
-\textbf{2. Strain-displacement relation:}
+\textbf{2. Maxwell rheology (in Laplace domain):}
 \begin{equation}
-\epsilon_{ij} = \frac{1}{2}\left(\frac{\partial u_i}{\partial x_j} + \frac{\partial u_j}{\partial x_i}\right)
+\mathbf{T} = \kappa(\nabla \cdot \mathbf{u})\mathbf{I} + 2\mu(s)\mathbf{D}
 \end{equation}
+where $\mathbf{D}$ is the strain deviator and
+\begin{equation}
+\mu(s) = \frac{\mu s}{s + \mu/\eta}
+\end{equation}
+is the Laplace-transformed shear modulus for Maxwell rheology.
 
-\textbf{3. Maxwell rheology:}
+\textbf{3. Gravitational field equation:}
 \begin{equation}
-\dot{\epsilon}_{ij} = \frac{1}{2\eta}\sigma_{ij}' + \frac{1}{2\mu}\dot{\sigma}_{ij}'
+\nabla^2 \phi = 4\pi G \rho_1
 \end{equation}
-where $\sigma_{ij}' = \sigma_{ij} - \frac{1}{3}\sigma_{kk}\delta_{ij}$ is deviatoric stress.
+where $\rho_1$ is the perturbed density.
 
-\textbf{4. Elastic stress-strain relation:}
+\subsection{Normal-Mode Eigenvalue Problem}
+
+The viscoelastic normal modes $\{\mathbf{u}_k, \phi_k\}$ with decay rates $s_k$ satisfy:
 \begin{equation}
-\sigma_{ij} = 2\mu\epsilon_{ij} + \lambda\epsilon_{kk}\delta_{ij}
+\mathcal{L}(s_k) \mathbf{u}_k = 0, \quad \mathcal{L}_\phi \phi_k = 0
 \end{equation}
-where $\lambda, \mu$ are Lamé parameters.
+where $\mathcal{L}(s)$ is the viscoelastic linear operator that depends on the Laplace variable $s$.
+
+\textbf{Key Point:} The eigenvalues $s_k$ are the \textbf{characteristic decay rates} of the Earth's viscoelastic response. The corresponding relaxation times are:
+\begin{equation}
+\tau_k = \frac{1}{s_k}
+\end{equation}
 
 \section{Elimination Process}
 
