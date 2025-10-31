@@ -166,9 +166,116 @@ Each degree $\ell$ has multiple relaxation times $\tau_{\ell,n}$ corresponding t
 
 The radial mode index $n$ reflects the number of nodes in the radial eigenfunction - higher $n$ corresponds to more complex radial structure and typically longer relaxation times.
 
-\section{Spherical Harmonic Decomposition}
+\section{Connection to Kendall et al. (2005): Time-Dependent Sea Level Equations}
 
-For a **spherically symmetric Earth**, we transform to spherical coordinates $(r,\theta,\phi)$ and expand in spherical harmonics.
+\subsection{From Normal Modes to Sea Level Response}
+
+Kendall et al. (2005) applied the Tromp \& Mitrovica (1999) framework to sea level problems. The time-dependent sea level response in spherical harmonic space is:
+
+\begin{equation}
+SL_{\ell m}(t_j) = T_\ell E_\ell[\rho_I I^*_{\ell m}(t_j) + \rho_w S_{\ell m}(t_j)] + T_\ell \sum_{i=1}^{j-1} \Delta t \sum_k A_\ell^k[\rho_I \Delta I^*_{\ell m}(t_i) + \rho_w \Delta S_{\ell m}(t_i)] e^{-(t_j-t_i)/\tau_k}
+\end{equation}
+
+where:
+\begin{itemize}
+\item $E_\ell = 1 + k_\ell^{el} - h_\ell^{el}$ (elastic response coefficient)
+\item $T_\ell = \frac{4\pi a^3}{M_e(2\ell + 1)}$ (normalization factor)
+\item $A_\ell^k$ are the normal-mode amplitudes from Tromp (1999)
+\item $\tau_k = 1/s_k$ are the normal-mode relaxation times
+\item The exponential terms $e^{-(t_j-t_i)/\tau_k}$ encode the **viscoelastic memory**
+\end{itemize}
+
+\subsection{Implementation in SLcode: MATLAB vs Python}
+
+\textbf{Key Implementation Note:} The complete Tromp (1999) → Kendall (2005) framework is implemented differently across SLcode versions:
+
+\subsubsection{MATLAB Implementation (Complete Viscoelastic Theory)}
+
+The MATLAB files ({\tt SL\_equation\_viscoelastic\_*.m}) implement the \textbf{full Tromp (1999) normal-mode theory}:
+
+\begin{equation}
+\boxed{
+\beta_\ell(t) = \sum_{k=1}^{N_{modes}} \frac{(k_{amp,\ell,k} - h_{amp,\ell,k})}{s_{\ell,k}} \left(1 - e^{-s_{\ell,k} \cdot t}\right)
+}
+\end{equation}
+
+where:
+\begin{itemize}
+\item {\tt spoles($\ell$,k)} $= s_{\ell,k}$ (normal-mode decay rates)
+\item {\tt k\_amp($\ell$,k)}, {\tt h\_amp($\ell$,k)} = amplitude coefficients from normal-mode eigenfunctions
+\item {\tt mode\_found($\ell$)} = number of computed modes for degree $\ell$
+\end{itemize}
+
+The MATLAB code loads these parameters from precomputed normal-mode solutions:
+\begin{verbatim}
+load SavedLN/prem.l90C.umVM2.lmVM2.mat
+% Contains: spoles, k_amp, h_amp, k_amp_tide, h_amp_tide, mode_found
+\end{verbatim}
+
+\subsubsection{Python Implementation (Elastic Only)}
+
+The Python files ({\tt SL\_equation\_elastic.py}) implement \textbf{only the elastic limit}:
+
+\begin{equation}
+E_{ml} = 1 + k_{lm} - h_{lm}
+\end{equation}
+
+using static Love numbers without time dependence. The Python version:
+\begin{itemize}
+\item  Loads elastic Love numbers: {\tt love['h\_el']}, {\tt love['k\_el']}
+\item  Implements Kendall (2005) elastic sea level equation
+\item  \textbf{Does not include} {\tt spoles}, {\tt k\_amp}, {\tt h\_amp} parameters
+\item  \textbf{No viscoelastic time dependence} or normal-mode theory
+\end{itemize}
+
+\textbf{Status:} According to the repository documentation, implementing the full viscoelastic Python version is a "Long Term" development goal.
+
+\section{Mathematical Derivation: From Continuum Mechanics to Implementation}
+
+\subsection{The Complete Theoretical Chain}
+
+The complete progression from fundamental physics to numerical implementation follows:
+
+\begin{center}
+\textbf{Maxwell Rheology} \\
+$\downarrow$ \\
+\textbf{Viscoelastic Normal-Mode Problem} \\
+$\downarrow$ \\
+\textbf{Eigenvalue Spectrum} $\{s_{\ell,k}\}$ \\
+$\downarrow$ \\
+\textbf{Green's Tensor Construction} \\
+$\downarrow$ \\
+\textbf{Love Number Time Dependence} \\
+$\downarrow$ \\
+\textbf{Kendall (2005) Sea Level Equations} \\
+$\downarrow$ \\
+\textbf{SLcode MATLAB Implementation}
+\end{center}
+
+\subsection{Physical Significance of Normal-Mode Parameters}
+
+The parameters in SLcode MATLAB files have direct physical meaning:
+
+\begin{itemize}
+\item \textbf{{\tt spoles($\ell$,k)} = $s_{\ell,k}$}: Characteristic decay rates of Earth's viscoelastic response
+  \begin{itemize}
+  \item Determined by mantle viscosity structure and elastic moduli
+  \item Fast modes: $s_{\ell,k} \sim 10^{-1}$ yr$^{-1}$ (surface/lithosphere)
+  \item Slow modes: $s_{\ell,k} \sim 10^{-4}$ yr$^{-1}$ (deep mantle flow)
+  \end{itemize}
+
+\item \textbf{{\tt k\_amp($\ell$,k)}, {\tt h\_amp($\ell$,k)}}: Amplitude coefficients from surface values of normal-mode eigenfunctions
+  \begin{itemize}
+  \item Related to gravitational potential and radial displacement eigenfunctions
+  \item Encode the coupling between loading and deformation for each mode
+  \end{itemize}
+
+\item \textbf{{\tt mode\_found($\ell$)}}: Number of computed normal modes for each spherical harmonic degree
+  \begin{itemize}
+  \item Higher $\ell$ typically requires more modes for convergence
+  \item Reflects the complexity of radial eigenfunction structure
+  \end{itemize}
+\end{itemize}
 
 \subsection{Displacement Field Expansion}
 
