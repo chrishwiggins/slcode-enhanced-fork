@@ -70,99 +70,101 @@ where $\mathcal{L}(s)$ is the viscoelastic linear operator that depends on the L
 \tau_k = \frac{1}{s_k}
 \end{equation}
 
-\section{Elimination Process}
+\subsection{Biorthogonality Relations}
 
-\subsection{Step 1: Express stress in terms of displacement}
+A key feature of viscoelastic normal modes is that they satisfy \textbf{biorthogonality relations} (Tromp \& Mitrovica 1999, Section 5):
 
-From equations (2) and (4):
+For distinct modes $\{\mathbf{u}_k, \phi_k\}$ and $\{\mathbf{u}_{k'}, \phi_{k'}\}$:
 \begin{equation}
-\sigma_{ij} = \mu\left(\frac{\partial u_i}{\partial x_j} + \frac{\partial u_j}{\partial x_i}\right) + \lambda\frac{\partial u_k}{\partial x_k}\delta_{ij}
+[\mathbf{u}_k, \phi_k; \{\mathcal{L}(s_k) - \mathcal{L}(s_{k'})\}\mathbf{u}_{k'}, 0] = 0
 \end{equation}
 
-\subsection{Step 2: Deviatoric stress}
+where $[\cdot; \cdot]$ denotes the duality product. These relations are essential for constructing the Green's tensor.
 
-The deviatoric part of (5):
+\section{Surface-Load Response via Green's Tensor (Tromp \& Mitrovica 1999, Section 7)}
+
+\subsection{Green's Tensor Construction}
+
+The displacement response to a point force is expressed as a normal-mode expansion:
 \begin{equation}
-\sigma_{ij}' = \mu\left(\frac{\partial u_i}{\partial x_j} + \frac{\partial u_j}{\partial x_i}\right) - \frac{2\mu}{3}\frac{\partial u_k}{\partial x_k}\delta_{ij}
+\mathbf{G}(\mathbf{r}, \mathbf{r}'; t) = -\sum_k \frac{1}{2s_k} \mathbf{u}_k(\mathbf{r}) \mathbf{u}_k(\mathbf{r}') e^{s_k t} H(t)
 \end{equation}
 
-\subsection{Step 3: Time derivatives}
+where $H(t)$ is the Heaviside function.
 
-From (2):
+\textbf{Physical Interpretation:} Each normal mode $k$ contributes to the Green's tensor with:
+\begin{itemize}
+\item \textbf{Spatial pattern}: $\mathbf{u}_k(\mathbf{r}) \mathbf{u}_k(\mathbf{r}')$ (eigenfunction product)
+\item \textbf{Temporal evolution}: $e^{s_k t}$ (exponential decay)
+\item \textbf{Amplitude}: $1/2s_k$ (inversely proportional to decay rate)
+\end{itemize}
+
+\subsection{Surface-Load Green's Vector}
+
+For surface loading, the relevant response function is:
 \begin{equation}
-\dot{\epsilon}_{ij} = \frac{1}{2}\left(\frac{\partial \dot{u}_i}{\partial x_j} + \frac{\partial \dot{u}_j}{\partial x_i}\right)
+\boldsymbol{\Gamma}(\mathbf{r}, \mathbf{r}'; t) = \text{Re} \sum_k \frac{1}{2s_k} \mathbf{u}_k(\mathbf{r})[\mathbf{u}_k(\mathbf{r}') \cdot \nabla' \Phi(\mathbf{r}') + \phi_k(\mathbf{r}')] e^{s_k t} H(t)
 \end{equation}
 
-From (6):
+The displacement field due to an arbitrary surface load $\sigma(\mathbf{r}', t')$ is:
 \begin{equation}
-\dot{\sigma}_{ij}' = \mu\left(\frac{\partial \dot{u}_i}{\partial x_j} + \frac{\partial \dot{u}_j}{\partial x_i}\right) - \frac{2\mu}{3}\frac{\partial \dot{u}_k}{\partial x_k}\delta_{ij}
+\mathbf{u}(\mathbf{r}, t) = \int_{-\infty}^t \int_{\partial V} \sigma(\mathbf{r}', t') \boldsymbol{\Gamma}(\mathbf{r}, \mathbf{r}'; t-t') d^2\mathbf{r}' dt'
 \end{equation}
 
-\section{Substitution into Maxwell Equation}
+\section{Spherically Symmetric Earth: Love Numbers from Normal Modes}
 
-Substituting (7) and (8) into the Maxwell rheology (3):
+\subsection{Spherical Harmonic Decomposition}
 
+For a spherically symmetric Earth, the normal modes separate by spherical harmonic degree $\ell$:
+\begin{align}
+\mathbf{u}_k(\mathbf{r}) &= \mathbf{u}_{\ell,n}(r) Y_\ell^m(\theta, \phi) \\
+\phi_k(\mathbf{r}) &= \phi_{\ell,n}(r) Y_\ell^m(\theta, \phi)
+\end{align}
+
+where $n$ indexes the radial modes for each degree $\ell$.
+
+The decay rates become $s_{\ell,n}$, giving degree-dependent relaxation times:
 \begin{equation}
-\frac{1}{2}\left(\frac{\partial \dot{u}_i}{\partial x_j} + \frac{\partial \dot{u}_j}{\partial x_i}\right) = \frac{1}{2\eta}\left[\mu\left(\frac{\partial u_i}{\partial x_j} + \frac{\partial u_j}{\partial x_i}\right) - \frac{2\mu}{3}\frac{\partial u_k}{\partial x_k}\delta_{ij}\right] + \frac{1}{2\mu}\left[\mu\left(\frac{\partial \dot{u}_i}{\partial x_j} + \frac{\partial \dot{u}_j}{\partial x_i}\right) - \frac{2\mu}{3}\frac{\partial \dot{u}_k}{\partial x_k}\delta_{ij}\right]
+\tau_{\ell,n} = \frac{1}{s_{\ell,n}}
 \end{equation}
 
-Simplifying:
-\begin{equation}
-\frac{\partial \dot{u}_i}{\partial x_j} + \frac{\partial \dot{u}_j}{\partial x_i} = \frac{\mu}{\eta}\left(\frac{\partial u_i}{\partial x_j} + \frac{\partial u_j}{\partial x_i}\right) - \frac{2\mu}{3\eta}\frac{\partial u_k}{\partial x_k}\delta_{ij} + \frac{\partial \dot{u}_i}{\partial x_j} + \frac{\partial \dot{u}_j}{\partial x_i} - \frac{2}{3}\frac{\partial \dot{u}_k}{\partial x_k}\delta_{ij}
-\end{equation}
+\subsection{Love Number Construction}
 
-This gives us:
-\begin{equation}
-0 = \frac{\mu}{\eta}\left(\frac{\partial u_i}{\partial x_j} + \frac{\partial u_j}{\partial x_i}\right) - \frac{2\mu}{3\eta}\frac{\partial u_k}{\partial x_k}\delta_{ij} - \frac{2}{3}\frac{\partial \dot{u}_k}{\partial x_k}\delta_{ij}
-\end{equation}
+The \textbf{viscoelastic Love numbers} are constructed from the surface values of the radial eigenfunctions:
 
-\section{The Linear Operator}
+\begin{align}
+h_\ell(t) &= h_\ell^E \delta(t) + \sum_{n=1}^{\infty} r_{\ell,n}^h e^{-t/\tau_{\ell,n}} \\
+k_\ell(t) &= k_\ell^E \delta(t) + \sum_{n=1}^{\infty} r_{\ell,n}^k e^{-t/\tau_{\ell,n}}
+\end{align}
 
-From momentum balance (1) with stress (5):
-\begin{equation}
-\mu\nabla^2 u_i + (\lambda + \mu)\frac{\partial}{\partial x_i}\left(\frac{\partial u_k}{\partial x_k}\right) = -f_i
-\end{equation}
+where:
+\begin{itemize}
+\item $h_\ell^E, k_\ell^E$ are \textbf{elastic Love numbers} (instantaneous response)
+\item $r_{\ell,n}^{h,k}$ are \textbf{residues} (amplitudes) determined from the normal-mode eigenfunctions
+\item $\tau_{\ell,n} = 1/s_{\ell,n}$ are \textbf{relaxation times} from the normal-mode eigenvalues
+\end{itemize}
 
-Combined with the Maxwell constraint (11), we get the \textbf{viscoelastic wave equation}:
+\textbf{Key Result:} The exponential terms $e^{-t/\tau_{\ell,n}}$ arise directly from the eigenvalue spectrum $s_{\ell,n}$ of the viscoelastic normal-mode problem.
 
-\begin{equation}
-\boxed{
-\mu\nabla^2 \dot{u}_i + (\lambda + \mu)\frac{\partial}{\partial x_i}\left(\frac{\partial \dot{u}_k}{\partial x_k}\right) + \frac{\mu^2}{\eta}\nabla^2 u_i + \frac{\mu(\lambda + \mu)}{\eta}\frac{\partial}{\partial x_i}\left(\frac{\partial u_k}{\partial x_k}\right) = -\dot{f}_i
-}
-\end{equation}
+\section{Physical Interpretation of Normal Modes}
 
-\section{Eigenvalue Problem}
+\subsection{Spherical Harmonic Degrees}
+\begin{itemize}
+\item \textbf{$\ell = 0$}: Radial expansion/contraction (breathing mode)
+\item \textbf{$\ell = 1$}: Translational motion (center of mass)
+\item \textbf{$\ell = 2$}: Flattening/elongation (tidal deformation)
+\item \textbf{Higher $\ell$}: Shorter wavelength surface deformation
+\end{itemize}
 
-For time-harmonic solutions $u_i = \hat{u}_i e^{-\lambda t}$, equation (13) becomes:
+\subsection{Radial Mode Structure}
 
-\begin{equation}
-\left[-\lambda\mu\nabla^2 + \frac{\mu^2}{\eta}\nabla^2\right]\hat{u}_i + \left[-\lambda(\lambda + \mu)\frac{\partial}{\partial x_i}\frac{\partial}{\partial x_k} + \frac{\mu(\lambda + \mu)}{\eta}\frac{\partial}{\partial x_i}\frac{\partial}{\partial x_k}\right]\hat{u}_k = \lambda\hat{f}_i
-\end{equation}
+Each degree $\ell$ has multiple relaxation times $\tau_{\ell,n}$ corresponding to different \textbf{radial modes}:
+\begin{itemize}
+\item \textbf{Fast modes ($n=1,2,...$)}: Surface/shallow deformation (years to decades)
+\item \textbf{Slow modes ($n$ large)}: Deep mantle flow (thousands of years)
+\end{itemize}
 
-This gives us the \textbf{linear operator}:
-
-\begin{equation}
-\boxed{
-L_{ij}[\hat{u}] = \left[\mu\left(\frac{\mu}{\eta} - \lambda\right)\nabla^2\delta_{ij} + (\lambda + \mu)\left(\frac{\mu}{\eta} - \lambda\right)\frac{\partial^2}{\partial x_i \partial x_j}\right]\hat{u}_j
-}
-\end{equation}
-
-\section{Eigenvalue Interpretation}
-
-The eigenvalue equation is:
-\begin{equation}
-L_{ij}[\hat{u}_j] = \lambda\hat{f}_i
-\end{equation}
-
-The eigenvalues $\lambda$ satisfy:
-\begin{equation}
-\lambda = \frac{\mu}{\eta} \pm \text{corrections from elastic terms}
-\end{equation}
-
-These eigenvalues determine the \textbf{relaxation times} $\tau = 1/\lambda$ that appear in the viscoelastic Love numbers:
-\begin{equation}
-h_\ell(t) = h_\ell^E\delta(t) + \sum_k r_\ell^k e^{-t/\tau_k}
-\end{equation}
+The radial mode index $n$ reflects the number of nodes in the radial eigenfunction - higher $n$ corresponds to more complex radial structure and typically longer relaxation times.
 
 \section{Spherical Harmonic Decomposition}
 
