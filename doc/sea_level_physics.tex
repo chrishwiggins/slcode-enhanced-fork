@@ -1,0 +1,146 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+
+\title{Why Numerical Methods for Linear Sea Level Physics?}
+\author{Rigorous Derivation}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{What This Is About}
+
+\textbf{The Big Picture:} When ice sheets melt (Greenland, Antarctica), where does sea level rise? Not uniformly! The physics of gravity + Earth deformation creates complex spatial patterns.
+
+\section{Basic Setup}
+
+\textbf{Single-letter variables only:}
+\begin{itemize}
+\item $s(\theta,\phi,t)$ = sea level height (water column thickness)
+\item $g(\theta,\phi,t)$ = gravitational equipotential surface height
+\item $n(\theta,\phi,t)$ = solid Earth surface height (seafloor)
+\item $\sigma(\theta,\phi,t)$ = surface mass density [kg/m²]
+\item $\rho$ = density [kg/m³]
+\end{itemize}
+
+\section{Fundamental Physics}
+
+\textbf{Kinematic definition (positive terms only):}
+\begin{equation}
+g = s + n
+\end{equation}
+
+\textbf{Physical meaning:} Height of water surface = thickness of water + height of seafloor
+
+\textbf{Gravitational potential:}
+\begin{equation}
+u(r) = G \int\int \frac{\sigma(\theta',\phi')}{|r-r'|} da'
+\end{equation}
+
+\textbf{Equipotential condition:}
+\begin{equation}
+u(g(\theta,\phi), \theta, \phi) = c
+\end{equation}
+where $c$ is constant.
+
+\textbf{Elastic deformation:}
+\begin{equation}
+n(\theta,\phi) = \int\int k(\theta,\phi; \theta',\phi') \sigma(\theta',\phi') da'
+\end{equation}
+where $k$ is elastic Green's function.
+
+\section{Surface Load Decomposition}
+
+Total surface load:
+\begin{equation}
+\sigma = \sigma_i + \sigma_w
+\end{equation}
+
+Water load from kinematics:
+\begin{equation}
+\sigma_w = \rho_w s
+\end{equation}
+
+Substituting into (5):
+\begin{equation}
+\sigma = \sigma_i + \rho_w s
+\end{equation}
+
+\section{The Coupled System}
+
+From equations (3) and (4):
+\begin{align}
+g &= \mathcal{G}[\sigma_i + \rho_w s] \\
+n &= \int\int k(\theta,\phi; \theta',\phi') [\sigma_i(\theta',\phi') + \rho_w s(\theta',\phi')] da'
+\end{align}
+
+where $\mathcal{G}[\cdot]$ solves the equipotential condition (3).
+
+\section{Master Equation}
+
+Substituting (8) and (9) into (1), solving for $s$:
+\begin{equation}
+\boxed{s = \mathcal{G}[\sigma_i + \rho_w s] - \int\int k(\theta,\phi; \theta',\phi') [\sigma_i(\theta',\phi') + \rho_w s(\theta',\phi')] da'}
+\end{equation}
+
+This is a \textbf{nonlinear integral equation} for $s(\theta,\phi)$.
+
+\section{Why Iteration is Required}
+
+Equation (10) has the form:
+\begin{equation}
+s = \mathcal{F}[s]
+\end{equation}
+
+where $\mathcal{F}$ is a nonlinear operator due to the equipotential condition.
+
+\textbf{The physics is linear} (both gravity and elasticity are linear), but the \textbf{self-consistency constraint} creates nonlinearity:
+\begin{itemize}
+\item Water redistributes based on $s$
+\item But $s$ depends on water distribution
+\item Fixed-point iteration required: $s^{(k+1)} = \mathcal{F}[s^{(k)}]$
+\end{itemize}
+
+\section{Spherical Harmonic Approach}
+
+Expand in spherical harmonics:
+\begin{equation}
+s(\theta,\phi) = \sum_{\ell m} s_{\ell m} Y_\ell^m(\theta,\phi)
+\end{equation}
+
+The operators become:
+\begin{align}
+\mathcal{G}[\sigma] &\rightarrow \beta_\ell^g \sigma_{\ell m} \\
+\int\int k \sigma da' &\rightarrow \beta_\ell^e \sigma_{\ell m}
+\end{align}
+
+where $\beta_\ell^g, \beta_\ell^e$ are Love numbers.
+
+\section{Discrete System}
+
+In spectral space, equation (10) becomes:
+\begin{equation}
+s_{\ell m} = (\beta_\ell^g - \beta_\ell^e)[\sigma_{i,\ell m} + \rho_w s_{\ell m}]
+\end{equation}
+
+Rearranging:
+\begin{equation}
+s_{\ell m}[1 - \rho_w(\beta_\ell^g - \beta_\ell^e)] = (\beta_\ell^g - \beta_\ell^e)\sigma_{i,\ell m}
+\end{equation}
+
+\textbf{This looks solvable!} But the ocean function $\Omega(\theta,\phi)$ (where water can exist) couples all modes, requiring iteration.
+
+\section{Conclusion}
+
+The sea level equation is \textbf{linear in physics} but \textbf{nonlinear in practice} due to:
+\begin{enumerate}
+\item Self-consistent water redistribution
+\item Ocean geometry constraints
+\item Equipotential surface computation
+\end{enumerate}
+
+Numerical iteration is unavoidable despite linear underlying physics.
+
+\end{document}

@@ -1,0 +1,309 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+
+\title{Why Numerical Methods for a Linear Sea Level Equation?}
+\author{Based on Kendall et al. (2005) and SLcode Implementation}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{The Fundamental Geophysical Problem}
+
+Following Kendall et al. (2005), we start with the governing equations for gravitationally self-consistent sea level change:
+
+\subsection{The Sea Level Definition}
+Sea level is fundamentally controlled by gravity - water flows to form a surface where gravitational potential is constant (like water in a bathtub finding its level, but on a planetary scale with varying gravity).
+
+\begin{equation}
+S(\theta,\psi, t) = G(\theta,\psi, t) - N(\theta,\psi, t)
+\end{equation}
+
+where:
+\begin{itemize}
+\item $S(\theta,\psi, t)$ is the sea level (ocean depth when positive)
+\item $G(\theta,\psi, t)$ is the height of the \textbf{gravitational equipotential surface} (the surface where ocean water naturally sits because gravity is constant)
+\item $N(\theta,\psi, t)$ is the height of the \textbf{solid Earth surface} (bedrock/seafloor)
+\item Both surfaces change when ice loads/unloads the Earth
+\end{itemize}
+
+\textbf{The Physical Picture:}
+\begin{itemize}
+\item Ice loads deform the solid Earth surface $N$ (makes it sink)
+\item Ice loads also change Earth's gravity field, shifting the equipotential surface $G$
+\item Water redistributes to stay on the new equipotential surface
+\item Sea level $S$ is the gap between these two moving surfaces
+\end{itemize}
+
+The key insight is that both $G$ and $N$ depend on the total surface load, which includes unknown water redistribution.
+
+\subsection{The Generalized Sea Level Equation}
+The ocean height change is given by (Kendall et al., 2005, Eq. 17):
+\begin{equation}
+\Delta S(\theta,\psi, t_j) = \Delta SL(\theta,\psi, t_j) C(\theta,\psi, t_j) \beta(\theta,\psi, t_j) - T(\theta,\psi, t_0)[C(\theta,\psi, t_j)\beta(\theta,\psi, t_j) - C(\theta,\psi, t_0)\beta(\theta,\psi, t_0)]
+\end{equation}
+
+where:
+\begin{itemize}
+\item $C(\theta,\psi, t)$ is the ocean function (1 in ocean, 0 on land)
+\item $\beta(\theta,\psi, t)$ accounts for grounded ice (1 where no grounded ice, 0 elsewhere)
+\item $T(\theta,\psi, t_0)$ is the initial topography
+\end{itemize}
+
+\subsection{Love Number Theory}
+For a spherically symmetric Earth, the sea level change is computed using Love numbers (Kendall et al., 2005, Eq. B18):
+\begin{equation}
+SL_{\ell m}(t_j) = T_\ell E_\ell \left[\rho_I I^*_{\ell m}(t_j) + \rho_w S_{\ell m}(t_j)\right] + \text{time history terms}
+\end{equation}
+
+where $E_\ell = 1 + k_\ell^{el} - h_\ell^{el}$ and $T_\ell = \frac{4\pi a^3}{M_e(2\ell + 1)}$.
+
+\subsection{The Self-Consistency Constraint}
+The water load depends on the sea level solution itself:
+\begin{equation}
+\sigma_{water}(\theta, \psi) = \rho_w [S(\theta, \psi) - \overline{S}] \Omega(\theta, \psi)
+\end{equation}
+
+This creates the fundamental coupling that requires iteration.
+
+\section{The Complete Coupled System}
+
+\subsection{Surface Load Components}
+The total surface load consists of ice and water contributions:
+\begin{equation}
+\sigma(\theta,\psi) = \sigma_{ice}(\theta,\psi) + \sigma_{water}(\theta,\psi)
+\end{equation}
+
+where the water load is determined by kinematics:
+\begin{equation}
+\sigma_{water}(\theta,\psi) = \rho_w S(\theta,\psi)
+\end{equation}
+
+\subsection{Elastic Earth Response}
+The solid Earth surface deforms according to Hooke's law. For surface loads, this gives the radial displacement:
+\begin{equation}
+N(\theta,\psi) = \int\int G_{elastic}(\theta,\psi; \theta',\psi') \sigma(\theta',\psi') dA'
+\end{equation}
+
+where $G_{elastic}$ is the elastic Green's function (solution to the continuum elasticity PDE with delta function forcing).
+
+\subsection{Gravitational Equipotential Condition}
+The ocean surface sits on a gravitational equipotential surface. The gravitational potential is:
+\begin{equation}
+U(r) = G \int\int \frac{\sigma(\theta',\psi')}{|r-r'|} dA'
+\end{equation}
+
+The equipotential condition requires:
+\begin{equation}
+U(G(\theta,\psi), \theta, \psi) = \text{constant}
+\end{equation}
+
+This implicitly defines $G(\theta,\psi)$ as a functional of the surface load $\sigma$.
+
+\subsection{The Master Equation for Sea Level}
+Combining all components, we obtain the complete nonlinear integro-differential equation for sea level:
+
+\begin{equation}
+\boxed{
+S(\theta,\psi) = \mathcal{G}_{grav}[\sigma_{ice} + \rho_w S] - \int\int G_{elastic}(\theta,\psi; \theta',\psi') [\sigma_{ice}(\theta',\psi') + \rho_w S(\theta',\psi')] dA'
+}
+\end{equation}
+
+where $\mathcal{G}_{grav}[\cdot]$ is the operator that solves the equipotential condition (5) for the gravitational surface height.
+
+\section{Why This System Requires Iteration}
+
+Combining equations (2), (3), and (4):
+\begin{align}
+S(\theta, \phi) &= \mathcal{G}[\sigma_{total}] - \frac{1}{g}\mathcal{P}[\sigma_{total}] \\
+&= \mathcal{L}[\sigma_{total}]
+\end{align}
+
+where $\mathcal{G}$ and $\mathcal{P}$ are Green's function operators for elastic deformation and gravitational potential.
+
+But from equation (6):
+\begin{equation}
+\sigma_{total} = \sigma_{ice} + \rho_w [S - \overline{S}] \Omega
+\end{equation}
+
+Substituting:
+\begin{equation}
+S = \mathcal{L}[\sigma_{ice}] + \mathcal{L}[\rho_w (S - \overline{S}) \Omega]
+\end{equation}
+
+This is the self-consistency equation showing why $S$ appears on both sides!
+
+\section{Spherical Harmonic Treatment}
+
+The PDEs are solved using spherical harmonic expansion. For any field $f(\theta, \phi)$:
+\begin{equation}
+f(\theta, \phi) = \sum_{l=0}^{\infty} \sum_{m=-l}^{l} f_{lm} Y_l^m(\theta, \phi)
+\end{equation}
+
+\subsection{Green's Functions in Spectral Domain}
+The elastic deformation operator becomes:
+\begin{equation}
+\mathcal{G}[\sigma] \rightarrow h_l^{el} \sigma_{lm}
+\end{equation}
+
+The gravitational potential operator becomes:
+\begin{equation}
+\mathcal{P}[\sigma] \rightarrow \frac{4\pi G R^2}{2l+1} k_l^{el} \sigma_{lm}
+\end{equation}
+
+where $h_l^{el}$ and $k_l^{el}$ are elastic Love numbers.
+
+\subsection{The Spectral Sea Level Equation}
+In spectral space, equation (10) becomes:
+\begin{equation}
+S_{lm} = \left(h_l^{el} - \frac{4\pi G R^2 k_l^{el}}{g(2l+1)}\right) \sigma_{lm}^{total}
+\end{equation}
+
+Let $\beta_l = h_l^{el} - \frac{4\pi G R^2 k_l^{el}}{g(2l+1)}$, so:
+\begin{equation}
+S_{lm} = \beta_l \sigma_{lm}^{total}
+\end{equation}
+
+\section{Matrix Formulation of the Fixed-Point Problem}
+
+The water load constraint in spectral space requires a transform back to spatial domain:
+\begin{equation}
+\sigma_{water}(\theta, \phi) = \rho_w [S(\theta, \phi) - \overline{S}] \Omega(\theta, \phi)
+\end{equation}
+
+This creates coupling between all spherical harmonic modes due to the product $S \cdot \Omega$.
+
+\subsection{The Discrete System}
+Discretizing on a global grid with $N$ points, we can write:
+\begin{equation}
+\mathbf{S} = \mathbf{B} \boldsymbol{\sigma}_{ice} + \mathbf{A} \mathbf{S}
+\end{equation}
+
+where:
+\begin{itemize}
+\item $\mathbf{S}$ is the $N \times 1$ sea level vector
+\item $\boldsymbol{\sigma}_{ice}$ is the prescribed ice load
+\item $\mathbf{B}$ represents the direct ice-to-sea-level response
+\item $\mathbf{A}$ represents the water redistribution feedback
+\end{itemize}
+
+\subsection{Rearranging to Standard Form}
+\begin{equation}
+(\mathbf{I} - \mathbf{A}) \mathbf{S} = \mathbf{B} \boldsymbol{\sigma}_{ice}
+\end{equation}
+
+This is the linear system that could theoretically be solved directly.
+
+The complexity arises from the \textbf{self-consistency requirement}. The total surface load consists of:
+\begin{equation}
+L_{total} = L_{ice} + L_{water}
+\end{equation}
+
+where:
+\begin{itemize}
+\item $L_{ice}$ is the prescribed ice load change (known)
+\item $L_{water}$ depends on the sea level solution $S$ (unknown!)
+\end{itemize}
+
+\section{The Coupled System}
+
+Both $N$ and $U$ depend on the total load:
+\begin{align}
+N(\theta, \phi) &= \sum_{l=0}^{\infty} \sum_{m=-l}^{l} h_l^{el} L_{lm} Y_l^m(\theta, \phi) \\
+U(\theta, \phi) &= \frac{4\pi G \rho_{avg} R^2}{2l+1} \sum_{l=0}^{\infty} \sum_{m=-l}^{l} k_l^{el} L_{lm} Y_l^m(\theta, \phi)
+\end{align}
+
+where $L_{lm}$ are the spherical harmonic coefficients of the total load, including the unknown water redistribution.
+
+\section{Water Load Redistribution}
+
+The water load change is determined by:
+\begin{equation}
+L_{water}(\theta, \phi) = \rho_w [S(\theta, \phi) - \overline{S}] \cdot \Omega(\theta, \phi)
+\end{equation}
+
+where:
+\begin{itemize}
+\item $\rho_w$ is water density
+\item $\overline{S}$ is the global mean sea level change
+\item $\Omega(\theta, \phi)$ is the ocean function (1 in ocean, 0 on land)
+\end{itemize}
+
+\section{The Fixed-Point Problem}
+
+Substituting everything together, we get:
+\begin{equation}
+S = \mathcal{F}[S]
+\end{equation}
+
+where $\mathcal{F}$ is a linear operator that depends on the solution $S$ itself through the water redistribution.
+
+\section{Why Iteration is Required}
+
+This creates a fixed-point equation that requires iterative solution:
+\begin{align}
+S^{(0)} &= \text{initial guess} \\
+S^{(k+1)} &= \mathcal{F}[S^{(k)}] \quad \text{for } k = 0, 1, 2, \ldots
+\end{align}
+
+Convergence occurs when:
+\begin{equation}
+||S^{(k+1)} - S^{(k)}|| < \epsilon
+\end{equation}
+
+\section{Matrix Formulation (Why Direct Solve is Hard)}
+
+In principle, we could write this as a linear system:
+\begin{equation}
+[I - A] \mathbf{S} = \mathbf{b}
+\end{equation}
+
+where:
+\begin{itemize}
+\item $\mathbf{S}$ is the vectorized sea level field
+\item $\mathbf{b}$ represents the ice-only contribution
+\item $A$ captures the water redistribution feedback
+\end{itemize}
+
+But this requires:
+\begin{itemize}
+\item Inverting a dense $N \times N$ matrix where $N \sim 10^4$ (global grid points)
+\item The matrix $A$ involves spherical harmonic transforms and convolutions
+\item Memory requirements: $O(N^2) \sim 10^8$ elements
+\item Computational cost: $O(N^3) \sim 10^{12}$ operations
+\end{itemize}
+
+\section{Iterative Advantages}
+
+The iterative approach:
+\begin{itemize}
+\item Uses fast spherical harmonic transforms: $O(N \log N)$ per iteration
+\item Requires only $O(N)$ memory storage
+\item Typically converges in 5-10 iterations
+\item Total cost: $O(k \cdot N \log N)$ where $k \ll N$
+\end{itemize}
+
+\section{Spherical Harmonic Complexity}
+
+Even if we could solve analytically, the expressions involve:
+\begin{equation}
+S(\theta, \phi) = \sum_{l=0}^{L_{max}} \sum_{m=-l}^{l} S_{lm} Y_l^m(\theta, \phi)
+\end{equation}
+
+For $L_{max} = 64$, this means $\sim 4225$ coefficients, each requiring:
+\begin{itemize}
+\item Love number applications: $h_l^{el}, k_l^{el}$
+\item Convolution with load coefficients
+\item Associated Legendre polynomial evaluations
+\item Complex arithmetic for phase relationships
+\end{itemize}
+
+\section{Conclusion}
+
+While the physics is linear, the self-consistency constraint creates a fixed-point problem that requires numerical iteration. The global scale and spherical harmonic complexity make analytical solutions impractical, even though the underlying mathematics is linear.
+
+The apparent contradiction resolves as: \textbf{linear physics + self-consistent constraint + global scale = numerical necessity}.
+
+\end{document}
